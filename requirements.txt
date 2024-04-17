@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+python-multipart
+python-jose[cryptography]
+passlib[bcrypt]
+pydantic
+psycopg2 #needs libpq-dev
+psycopg2-binary
+sqlalchemy
