@@ -7,3 +7,6 @@ pydantic
 psycopg2 #needs libpq-dev
 psycopg2-binary
 sqlalchemy
+pika==1.2.0
+python-jose[cryptography]
+
