@@ -2,13 +2,9 @@ version: '3.8'
 
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     ports:
       - "8000:8000"
-    volumes:
-      - .:/app
     depends_on:
       - db
       - rabbitmq
@@ -21,8 +17,6 @@ services:
       POSTGRES_DB: postgres
     ports:
       - "5432:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
 
   rabbitmq:
     image: "rabbitmq:3-management"
@@ -30,23 +24,5 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-    - RABBITMQ_DEFAULT_USER=123
-    - RABBITMQ_DEFAULT_PASS=123
-    volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
-
-  worker:
-    build:
-      context: ./job  # Adjust if your Dockerfile_worker is located elsewhere
-      dockerfile: Dockerfile_worker
-    depends_on:
-      - rabbitmq
-    volumes:
-      - ./job:/app/job
-    links:
-      - rabbitmq
-
-volumes:
-  postgres-data:
-  rabbitmq-data:
-
+      - RABBITMQ_DEFAULT_USER=123
+      - RABBITMQ_DEFAULT_PASS=123

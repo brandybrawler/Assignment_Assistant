@@ -1,26 +1,21 @@
-ARG VARIANT=3.11.2
-FROM python:${VARIANT}-slim AS base
+# Dockerfile
+FROM python:3.10.11
 
-# Set the working directory
 WORKDIR /app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
     libpq-dev \
- && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements
+# Copy requirements and install Python dependencies
 COPY requirements.txt .
-
-# Install dependencies
 RUN pip install -r requirements.txt
 
-# Copy the rest of the application code
+# Copy all application files
 COPY . .
 
-CMD ["python3", "main.py"]
+# Command to run the main application
+CMD ["python", "main.py"]
 
-# Expose port
-EXPOSE 8000
+# You might want to add a secondary command to handle jobs, or manage it within your Python application
