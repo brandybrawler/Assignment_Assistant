@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jobs</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen">
+<header class="text-lg p-5 text-white bg-blue-800 w-full text-center">
+  <span id="usernameDisplay">Welcome, User</span>
+</header>
+<div class="flex flex-col items-center">
+  <!-- New Job Form -->
+  <form id="newJobForm" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-xs">
+    <div class="mb-4">
+      <input type="text" id="jobDescription" placeholder="Job Description" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+    </div>
+    <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Submit Job</button>
+  </form>
+
+  <div id="jobsList" class="bg-white p-5 w-full max-w-4xl mt-5"></div>
+  <button id="refreshJobs" class="mt-5 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Refresh Jobs</button>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const usernameDisplay = document.getElementById('usernameDisplay');
+  const userData = JSON.parse(localStorage.getItem('user'));
+  usernameDisplay.textContent = `Welcome, ${userData.username}`;
+
+  // Handle new job form submission
+  document.getElementById('newJobForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const jobDescription = document.getElementById('jobDescription').value;
+    const accessToken = localStorage.getItem('access_token');
+    fetch('/jobs/', {
+    method: 'POST',
+    headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ description: jobDescription })
+    })
+
+    .then(response => response.json())
+    .then(data => {
+        console.log('data', data)
+      alert('Job submitted successfully: ' + data.new_job.id);
+      document.getElementById('jobDescription').value = ''; // Clear the input after successful submission
+      fetchJobs(); // Refresh job list
+    })
+    .catch(error => console.error('Error:', error));
+  });
+
+  fetchJobs();
+  document.getElementById('refreshJobs').addEventListener('click', function() {
+    fetchJobs();
+  });
+});
+
+function fetchJobs() {
+  const accessToken = localStorage.getItem('access_token');
+  fetch('/jobs', {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json'
+    }
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Failed to fetch jobs');
+    }
+    return response.json();
+  })
+  .then(jobs => {
+    const jobsList = document.getElementById('jobsList');
+    jobsList.innerHTML = ''; // Clear existing jobs
+    jobs.forEach(job => {
+      const jobElement = document.createElement('div');
+      jobElement.className = 'p-4 m-2 bg-white shadow-md rounded';
+      jobElement.innerHTML = `<h3>${job.name}</h3><p>Details: ${job.details}</p><p>Progress: ${job.percentage_completed}%</p>`;
+      jobsList.appendChild(jobElement);
+    });
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+}
+</script>
+</body>
+</html>
