@@ -15,6 +15,17 @@
     <div class="mb-6">
       <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" type="password" id="password" placeholder="Password" required>
     </div>
+    <div class="mb-6">
+      <label class="block mb-2 text-sm font-bold text-gray-700">
+        After login, navigate to:
+      </label>
+      <div class="flex items-center mb-4">
+        <input type="radio" name="redirect" id="jobs" value="jobs" class="mr-2">
+        <label for="jobs" class="mr-4 text-gray-700">Jobs Page</label>
+        <input type="radio" name="redirect" id="chat" value="chat" class="mr-2">
+        <label for="chat" class="text-gray-700">Chat Page</label>
+      </div>
+    </div>
     <div class="flex items-center justify-between">
       <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
         Login
@@ -23,37 +34,38 @@
   </form>
 </div>
 <script>
-document.getElementById('loginForm').addEventListener('submit', function(event) {
-  event.preventDefault();
-  const username = document.getElementById('username').value;
-  const password = document.getElementById('password').value;
-
-  fetch('/token', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: new URLSearchParams({
-        username: document.getElementById('username').value,
-        password: document.getElementById('password').value
+  document.getElementById('loginForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const redirectChoice = document.querySelector('input[name="redirect"]:checked').value;
+  
+    fetch('/token', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+          username: username,
+          password: password
+      })
     })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Login failed');
+      }
+      return response.json();
     })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Login failed');
-    }
-    return response.json();
-  })
-  .then(data => {
-    localStorage.setItem('access_token', data.access_token);
-    localStorage.setItem('user', JSON.stringify(data.user));
-    window.location.href = '/'; // Redirect to jobs page after successful login
-  })
-  .catch(error => {
-    console.error('Error:', error);
+    .then(data => {
+      localStorage.setItem('access_token', data.access_token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      window.location.href = redirectChoice === 'jobs' ? '/' : 'chat';
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Login failed. Please try again.');
+    });
   });
-});
-
 </script>
 </body>
 </html>

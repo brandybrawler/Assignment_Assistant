@@ -156,3 +156,10 @@ async def signup_page():
     with open(path, "r", encoding="utf-8") as f:
         html_content = f.read()
     return HTMLResponse(content=html_content, status_code=200)
+
+@router.get("/chat", response_class=HTMLResponse)
+async def login_page():
+    path = "templates/chat.html"
+    with open(path, "r", encoding="utf-8") as f:
+        html_content = f.read()
+    return HTMLResponse(content=html_content, status_code=200)

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat Page</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex flex-col justify-center items-center min-h-screen">
+<div class="w-full max-w-md">
+  <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+    <div id="chatArea" class="h-64 overflow-y-auto mb-4 p-3 bg-gray-200 rounded">
+      <!-- Messages will be displayed here -->
+    </div>
+    <form id="chatForm">
+      <div class="mb-4">
+        <label for="transcribed_text" class="block text-gray-700 text-sm font-bold mb-2">
+          Enter Your Message:
+        </label>
+        <textarea id="transcribed_text" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" rows="3" placeholder="Type your message here..." required></textarea>
+      </div>
+      <div class="flex items-center justify-between">
+        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+          Send
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+document.getElementById('chatForm').addEventListener('submit', function(event) {
+  event.preventDefault();
+  const textInput = document.getElementById('transcribed_text').value;
+  const chatArea = document.getElementById('chatArea');
+
+  // Display user's message
+  chatArea.innerHTML += `<div class="p-2 my-2 bg-blue-300 text-white rounded">${textInput}</div>`;
+
+  fetch('http://localhost:8089/incoming_text', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({transcribed_text: textInput})
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.response === "Text processed successfully") {
+      // Display response from the server
+      chatArea.innerHTML += `<div class="p-2 my-2 bg-green-300 rounded">${data.text}</div>`;
+    } else {
+      throw new Error(data.error || "Failed to process the message");
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('Failed to send message');
+  });
+
+  // Clear the textarea after sending the message
+  document.getElementById('transcribed_text').value = '';
+});
+</script>
+</body>
+</html>
