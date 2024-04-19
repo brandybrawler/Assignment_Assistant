@@ -1,12 +1,21 @@
 import json
 import sys
 import time
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 from database import engine
 from models import Job
+from models import Notification
 import pika
 
 SessionLocal = sessionmaker(bind=engine)
+
+def create_notification_for_user(db: Session, user_id: int, message: str):
+    notification = Notification(user_id=user_id, message=message)
+    db.add(notification)
+    db.commit()
+
+# Example usage after a job is processed
+create_notification_for_user(db, user_id, "Your job has completed successfully.")
 
 def process_job(job_data):
     # Placeholder for your job processing logic
